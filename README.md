@@ -18,7 +18,9 @@
 
 # DockerHook
 
-<img src="./docs/imgs/logo.jpg" width="1024" alt="DockerHook logo"/>
+<p style="text-align: center">
+    <img src="./docs/imgs/logo.jpg" width="512" alt="DockerHook logo"/>
+</p>
 
 DockerHook is a way to manage your Docker processes using a webhook!
 
