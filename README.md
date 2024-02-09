@@ -3,7 +3,6 @@
   * [Get started](#get-started)
   * [Environment Variables](#environment-variables)
     * [`CONFIG_PATH`](#config_path)
-    * [`PORT`](#port)
   * [WebHook](#webhook)
     * [Url](#url)
     * [Query Parameters](#query-parameters)
@@ -44,13 +43,6 @@ DockerHook uses the environment variables to allow you to customize the paramete
 * **Default**: `/etc/dockerhook/dockerhook.yml`
 
 Specify the path where your configuration file is located
-
-### `PORT`
-
-* **Type**: `int`
-* **Default**: `8080`
-
-Specify the port that DockerHook will use.
 
 ## WebHook
 
