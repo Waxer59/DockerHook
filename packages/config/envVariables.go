@@ -7,7 +7,7 @@ import (
 
 type EnvVariables struct {
 	ConfigPath string `env:"CONFIG_PATH" envDefault:"dockerhook.yml"`
-	Port       string `env:"PORT" envDefault:"8080"`
+	Port       string `envDefault:"8080"`
 }
 
 func LoadEnvVariables() (*EnvVariables, error) {
