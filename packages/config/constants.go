@@ -1,6 +1,6 @@
 package config
 
 const (
-	prefix      = "hearmeout."
+	prefix      = "dockerhook."
 	EnableLabel = prefix + "enable"
 )

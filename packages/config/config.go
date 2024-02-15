@@ -5,6 +5,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"gopkg.in/yaml.v3"
 	"os"
+	"strings"
 )
 
 type ConfigFile struct {
@@ -13,25 +14,38 @@ type ConfigFile struct {
 }
 
 type config struct {
-	Enable        bool   `yaml:"enable"`
-	LabelBased    bool   `yaml:"labelBased"`
-	DefaultAction string `yaml:"defaultAction" validate:"oneof=pull start stop restart"`
+	RemoveOldImage bool   `yaml:"removeOldImage"`
+	LabelBased     bool   `yaml:"labelBased"`
+	DefaultAction  string `yaml:"defaultAction" validate:"oneof=pull start stop restart"`
 }
 
 type auth struct {
+	Enable     bool     `yaml:"enable"`
 	Tokens     []string `yaml:"tokens"`
 	TokensFile string   `yaml:"tokensFile"`
 	Groups     []string `yaml:"groups"`
 }
 
 func LoadConfig(configPath string) (*ConfigFile, error) {
-	var c = &ConfigFile{}
-	fmt.Println("Reading the configuration file...")
+	c := &ConfigFile{ // default config
+		Config: config{
+			RemoveOldImage: false,
+			LabelBased:     false,
+			DefaultAction:  "pull",
+		},
+		Auth: auth{
+			Enable:     false,
+			Tokens:     []string{},
+			Groups:     []string{},
+			TokensFile: "",
+		},
+	}
+	fmt.Println("Looking for configuration file")
 	configYml, err := os.ReadFile(configPath)
 
 	if err != nil {
-		fmt.Println("Something went wrong reading the configuration file, please check if the path is correct")
-		return nil, err
+		fmt.Println("No configuration file was found")
+		return c, nil
 	}
 
 	err = yaml.Unmarshal(configYml, c)
@@ -53,4 +67,20 @@ func LoadConfig(configPath string) (*ConfigFile, error) {
 	fmt.Println("Configuration file read successfully!")
 
 	return c, nil
+}
+
+func (c *ConfigFile) GetTokens() []string {
+	var tokens []string
+	if c.Auth.TokensFile != "" {
+		file, err := os.ReadFile(c.Auth.TokensFile)
+
+		if err != nil {
+			fmt.Println("Something went wrong reading the tokens file, please check if the path is correct")
+			return nil
+		}
+
+		tokens = append(tokens, strings.Split(string(file), "\n")...)
+	}
+
+	return tokens
 }

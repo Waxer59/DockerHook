@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"github.com/Waxer59/DockerHook/packages/config"
 	"github.com/Waxer59/DockerHook/packages/webhook"
@@ -13,7 +12,7 @@ import (
 
 func main() {
 	envVariables, err := config.LoadEnvVariables()
-	fmt.Println(envVariables)
+
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -28,8 +27,7 @@ func main() {
 
 	fmt.Println("Conecting to docker cli...")
 
-	ctx := context.Background()
-	cli, err := client.NewClientWithOpts(client.FromEnv)
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 
 	if err != nil {
 		fmt.Println("Error conecting to docker cli")
@@ -37,8 +35,6 @@ func main() {
 	}
 
 	fmt.Println("Connected to docker cli")
-
-	cli.NegotiateAPIVersion(ctx)
 
 	app := fiber.New(fiber.Config{
 		AppName:       "DockerHook",

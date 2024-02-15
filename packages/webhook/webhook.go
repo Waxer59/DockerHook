@@ -8,17 +8,29 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/gofiber/fiber/v2"
+	"io"
+	"os"
 	"slices"
 )
 
 type queryParameters struct {
 	Action string `query:"action"`
+	Token  string `query:"token"`
 }
 
 func Webhook(c *fiber.Ctx, cfg config.ConfigFile, cli client.Client) error {
 	queryParams := new(queryParameters)
 	serviceName := c.Params("service")
 	ctx := context.Background()
+
+	if cfg.Auth.Enable {
+		token := queryParams.Token
+		registeredTokens := cfg.GetTokens()
+
+		if !slices.Contains(registeredTokens, token) {
+			return fiber.ErrUnauthorized
+		}
+	}
 
 	if queryParams.Action == "" {
 		queryParams.Action = cfg.Config.DefaultAction
@@ -29,8 +41,6 @@ func Webhook(c *fiber.Ctx, cfg config.ConfigFile, cli client.Client) error {
 	}
 
 	availableContainers, err := discoverContainers(cli, cfg)
-
-	fmt.Println(availableContainers)
 
 	if err != nil {
 		return fiber.ErrInternalServerError
@@ -54,7 +64,57 @@ func Webhook(c *fiber.Ctx, cfg config.ConfigFile, cli client.Client) error {
 	case "restart":
 		err = cli.ContainerRestart(ctx, selectedContainer.ID, container.StopOptions{})
 	case "pull":
-		// TODO
+		oldContainer, err := cli.ContainerInspect(ctx, selectedContainer.ID)
+
+		if err != nil {
+			fmt.Println(err.Error())
+			return fiber.ErrInternalServerError
+		}
+
+		pull, err := cli.ImagePull(ctx, selectedContainer.Image, types.ImagePullOptions{})
+
+		if err != nil {
+			fmt.Println(err.Error())
+			return fiber.ErrInternalServerError
+		}
+
+		defer pull.Close()
+
+		// cli.ImagePull is asynchronous.
+		// The reader needs to be read completely for the pull operation to complete.
+		io.Copy(os.Stdout, pull)
+
+		// Remove old container
+		err = cli.ContainerRemove(ctx, oldContainer.ID, container.RemoveOptions{
+			Force: true,
+		})
+
+		if err != nil {
+			fmt.Println(err.Error())
+			return fiber.ErrInternalServerError
+		}
+
+		if cfg.Config.RemoveOldImage {
+			_, err = cli.ImageRemove(ctx, oldContainer.Image, types.ImageRemoveOptions{
+				Force: true,
+			})
+
+			if err != nil {
+				fmt.Println(err.Error())
+				return fiber.ErrInternalServerError
+			}
+		}
+
+		resp, err := cli.ContainerCreate(ctx, oldContainer.Config, oldContainer.HostConfig, nil, nil, oldContainer.Name)
+
+		if err != nil {
+			fmt.Println(err.Error())
+			return fiber.ErrInternalServerError
+		}
+
+		if err := cli.ContainerStart(ctx, resp.ID, container.StartOptions{}); err != nil {
+			panic(err)
+		}
 	default:
 		return fiber.ErrNotFound
 	}
@@ -77,7 +137,7 @@ func discoverContainers(cli client.Client, cfg config.ConfigFile) ([]types.Conta
 	}
 
 	for _, c := range containers {
-		if cfg.Config.Enable && containerLabelStatus(c, config.EnableLabel) || !cfg.Config.Enable {
+		if cfg.Auth.Enable && containerLabelStatus(c, config.EnableLabel) || !cfg.Auth.Enable {
 			availableContainers = append(availableContainers, c)
 		}
 	}
