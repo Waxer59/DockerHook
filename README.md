@@ -1,24 +1,22 @@
-<!-- TOC -->
-* [DockerHook](#dockerhook)
-  * [Get started](#get-started)
-  * [Environment Variables](#environment-variables)
-    * [`CONFIG_PATH`](#config_path)
-  * [WebHook](#webhook)
-    * [Url](#url)
-    * [Query Parameters](#query-parameters)
-      * [`action`](#action)
-      * [`token`](#token)
-  * [Config Properties](#config-properties)
-    * [`config`](#config)
-      * [`labelBased`](#labelbased)
-      * [`defaultAction`](#defaultaction)
-      * [`removeOldImage`](#removeoldimage)
-    * [`auth`](#auth)
-      * [`enable`](#enable)
-      * [`tokensFile`](#tokensfile)
-      * [`tokens`](#tokens)
-  * [Examples](#examples)
-<!-- TOC -->
+- [DockerHook](#dockerhook)
+  - [Get started](#get-started)
+  - [Environment Variables](#environment-variables)
+    - [`CONFIG_PATH`](#config_path)
+  - [WebHook](#webhook)
+    - [Url](#url)
+    - [Query Parameters](#query-parameters)
+      - [`action`](#action)
+      - [`token`](#token)
+  - [Config Properties](#config-properties)
+    - [`config`](#config)
+      - [`labelBased`](#labelbased)
+      - [`defaultAction`](#defaultaction)
+      - [`removeOldImage`](#removeoldimage)
+    - [`auth`](#auth)
+      - [`enable`](#enable)
+      - [`tokensFile`](#tokensfile)
+      - [`tokens`](#tokens)
+  - [Examples](#examples)
 
 # DockerHook
 
@@ -85,6 +83,20 @@ Specifies the access token to control the execution of the Webhook if the [`enab
 ## Config Properties
 
 Configuration properties allow you to mold DockerHook to your needs!
+
+The DockerHook configuration file must have the extension `.yml` and it looks like this:
+
+```yaml
+config:
+  labelBased: true
+  # ...
+
+auth:
+  tokens:
+    - token1
+    - token2
+  # ...
+```
 
 ### `config`
 

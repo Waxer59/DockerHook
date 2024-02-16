@@ -55,6 +55,15 @@ func LoadConfig(configPath string) (*ConfigFile, error) {
 		return nil, err
 	}
 
+	fileTokens, err := c.loadFileTokens()
+
+	if err != nil {
+		fmt.Println("Something went wrong reading the tokens file, please check if the path is correct")
+		return nil, err
+	}
+
+	c.Auth.Tokens = append(c.Auth.Tokens, fileTokens...)
+
 	validate := validator.New()
 
 	err = validate.Struct(c)
@@ -69,18 +78,18 @@ func LoadConfig(configPath string) (*ConfigFile, error) {
 	return c, nil
 }
 
-func (c *ConfigFile) GetTokens() []string {
+func (c *ConfigFile) loadFileTokens() ([]string, error) {
 	var tokens []string
 	if c.Auth.TokensFile != "" {
+		fmt.Println("Reading tokens from file")
 		file, err := os.ReadFile(c.Auth.TokensFile)
 
 		if err != nil {
-			fmt.Println("Something went wrong reading the tokens file, please check if the path is correct")
-			return nil
+			return nil, err
 		}
 
 		tokens = append(tokens, strings.Split(string(file), "\n")...)
 	}
 
-	return tokens
+	return tokens, nil
 }

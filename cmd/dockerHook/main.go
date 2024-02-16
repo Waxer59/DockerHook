@@ -24,6 +24,7 @@ func main() {
 		log.Fatal(err)
 		return
 	}
+	fmt.Println(cfg)
 
 	fmt.Println("Conecting to docker cli...")
 
@@ -41,7 +42,6 @@ func main() {
 		CaseSensitive: true,
 		GETOnly:       true,
 	})
-
 	app.Use(logger.New())
 
 	app.Get("/:service", func(c *fiber.Ctx) error {

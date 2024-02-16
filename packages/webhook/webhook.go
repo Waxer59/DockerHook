@@ -3,14 +3,15 @@ package webhook
 import (
 	"context"
 	"fmt"
+	"io"
+	"os"
+	"slices"
+
 	"github.com/Waxer59/DockerHook/packages/config"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/gofiber/fiber/v2"
-	"io"
-	"os"
-	"slices"
 )
 
 type queryParameters struct {
@@ -25,7 +26,7 @@ func Webhook(c *fiber.Ctx, cfg config.ConfigFile, cli client.Client) error {
 
 	if cfg.Auth.Enable {
 		token := queryParams.Token
-		registeredTokens := cfg.GetTokens()
+		registeredTokens := cfg.Auth.Tokens
 
 		if !slices.Contains(registeredTokens, token) {
 			return fiber.ErrUnauthorized
