@@ -12,8 +12,8 @@ FROM base AS runner
 
 WORKDIR /app
 
-COPY --from=build app/dockerHook .
+COPY --from=build /app/dockerHook .
 
 EXPOSE 8080
 
-ENTRYPOINT [ "app/dockerHook" ]
+ENTRYPOINT [ "/app/dockerHook" ]
