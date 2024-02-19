@@ -16,7 +16,6 @@ import (
 
 type queryParameters struct {
 	Action string `query:"action"`
-	Token  string `query:"token"`
 }
 
 func Webhook(c *fiber.Ctx, cfg config.ConfigFile, cli client.Client) error {
@@ -24,27 +23,18 @@ func Webhook(c *fiber.Ctx, cfg config.ConfigFile, cli client.Client) error {
 	serviceName := c.Params("service")
 	ctx := context.Background()
 
-	if cfg.Auth.Enable {
-		token := queryParams.Token
-		registeredTokens := cfg.Auth.Tokens
-
-		if !slices.Contains(registeredTokens, token) {
-			return fiber.ErrUnauthorized
-		}
-	}
-
 	if queryParams.Action == "" {
 		queryParams.Action = cfg.Config.DefaultAction
 	}
 
 	if err := c.QueryParser(queryParams); err != nil {
-		return fiber.ErrInternalServerError
+		return c.SendStatus(fiber.StatusInternalServerError)
 	}
 
 	availableContainers, err := discoverContainers(cli, cfg)
 
 	if err != nil {
-		return fiber.ErrInternalServerError
+		return c.SendStatus(fiber.StatusInternalServerError)
 	}
 
 	selectedContainerIdx := slices.IndexFunc(availableContainers, func(c types.Container) bool {
@@ -52,7 +42,7 @@ func Webhook(c *fiber.Ctx, cfg config.ConfigFile, cli client.Client) error {
 	})
 
 	if selectedContainerIdx == -1 {
-		return fiber.ErrNotFound
+		return c.SendStatus(fiber.StatusNotFound)
 	}
 
 	selectedContainer := availableContainers[selectedContainerIdx]
@@ -69,14 +59,14 @@ func Webhook(c *fiber.Ctx, cfg config.ConfigFile, cli client.Client) error {
 
 		if err != nil {
 			fmt.Println(err.Error())
-			return fiber.ErrInternalServerError
+			return c.SendStatus(fiber.StatusInternalServerError)
 		}
 
 		pull, err := cli.ImagePull(ctx, selectedContainer.Image, types.ImagePullOptions{})
 
 		if err != nil {
 			fmt.Println(err.Error())
-			return fiber.ErrInternalServerError
+			return c.SendStatus(fiber.StatusInternalServerError)
 		}
 
 		defer pull.Close()
@@ -92,7 +82,7 @@ func Webhook(c *fiber.Ctx, cfg config.ConfigFile, cli client.Client) error {
 
 		if err != nil {
 			fmt.Println(err.Error())
-			return fiber.ErrInternalServerError
+			return c.SendStatus(fiber.StatusInternalServerError)
 		}
 
 		if cfg.Config.RemoveOldImage {
@@ -102,7 +92,7 @@ func Webhook(c *fiber.Ctx, cfg config.ConfigFile, cli client.Client) error {
 
 			if err != nil {
 				fmt.Println(err.Error())
-				return fiber.ErrInternalServerError
+				return c.SendStatus(fiber.StatusInternalServerError)
 			}
 		}
 
@@ -110,18 +100,18 @@ func Webhook(c *fiber.Ctx, cfg config.ConfigFile, cli client.Client) error {
 
 		if err != nil {
 			fmt.Println(err.Error())
-			return fiber.ErrInternalServerError
+			return c.SendStatus(fiber.StatusInternalServerError)
 		}
 
 		if err := cli.ContainerStart(ctx, resp.ID, container.StartOptions{}); err != nil {
 			panic(err)
 		}
 	default:
-		return fiber.ErrNotFound
+		return c.SendStatus(fiber.StatusNotFound)
 	}
 
 	if err != nil {
-		return fiber.ErrInternalServerError
+		return c.SendStatus(fiber.StatusInternalServerError)
 	}
 
 	return c.SendStatus(200)
@@ -138,7 +128,7 @@ func discoverContainers(cli client.Client, cfg config.ConfigFile) ([]types.Conta
 	}
 
 	for _, c := range containers {
-		if cfg.Auth.Enable && containerLabelStatus(c, config.EnableLabel) || !cfg.Auth.Enable {
+		if cfg.Config.LabelBased && containerLabelStatus(c, config.EnableLabel) || !cfg.Config.LabelBased {
 			availableContainers = append(availableContainers, c)
 		}
 	}

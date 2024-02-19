@@ -16,6 +16,7 @@
       - [`enable`](#enable)
       - [`tokensFile`](#tokensfile)
       - [`tokens`](#tokens)
+      - [`groups`](#groups)
   - [Examples](#examples)
 
 # DockerHook
@@ -152,6 +153,43 @@ Specify your access tokens
 
 > [!NOTE]
 > In case [`tokensFile`](#tokensfile) and [`tokens`](#tokens) are filled both tokens will be merged.
+
+#### `groups`
+
+* **Type**: `[]string`
+
+Groups allow you to restrict access to the token, such as allowing it to only be able to `start` your services.
+
+To create a group it must have the following format: `<groupName>:<actions-splitted-by-commas>`
+
+Look at the following examples of how a group would be created:
+
+```yaml
+auth:
+  groups:
+    - onlyStart:start
+    - startAndPull:start,pull
+```
+
+Now in order to use this group you have created you will have to create the token as follows: `<groupName>:<token>`
+
+> [!CAUTION]
+> In case no group name is specified, the access that this token will have will be full.
+
+See the following example to learn how to use groups and tokens together:
+
+```yaml
+auth:
+  groups:
+    - onlyStart:start
+    - startAndPull:start,pull
+  tokens:
+    - onlyStart:tok3n
+    - startAndPull:tekken
+```
+
+> [!IMPORTANT]
+> The token to be sent to the Webhook must be the token without the group name specification, i.e. this token `onlyStart:tok3n`should be sent to the Webhook as `tok3n`.
 
 ## Examples
 

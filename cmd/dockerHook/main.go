@@ -8,6 +8,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"log"
+	"slices"
+	"strings"
 )
 
 func main() {
@@ -24,7 +26,6 @@ func main() {
 		log.Fatal(err)
 		return
 	}
-	fmt.Println(cfg)
 
 	fmt.Println("Conecting to docker cli...")
 
@@ -42,7 +43,33 @@ func main() {
 		CaseSensitive: true,
 		GETOnly:       true,
 	})
+
+	// middlewares
 	app.Use(logger.New())
+	app.Use(func(c *fiber.Ctx) error {
+		registeredTokens := cfg.Auth.Tokens
+		token := c.Query("token")
+		action := c.Query("action")
+		tokenAccess := cfg.GetTokenActions(token)
+
+		fmt.Println(tokenAccess)
+
+		if action == "" {
+			action = cfg.Config.DefaultAction
+		}
+
+		if !slices.Contains(tokenAccess, action) {
+			return c.SendStatus(fiber.StatusUnauthorized)
+		}
+
+		if cfg.Auth.Enable && !slices.ContainsFunc(registeredTokens, func(t string) bool {
+			return strings.Contains(t, token)
+		}) {
+			return c.SendStatus(fiber.StatusUnauthorized)
+		}
+
+		return c.Next()
+	})
 
 	app.Get("/:service", func(c *fiber.Ctx) error {
 		return webhook.Webhook(c, *cfg, *cli)

@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+var actions = []string{"start", "stop", "restart", "pull"}
+
 type ConfigFile struct {
 	Config config
 	Auth   auth
@@ -31,7 +33,7 @@ func LoadConfig(configPath string) (*ConfigFile, error) {
 		Config: config{
 			RemoveOldImage: false,
 			LabelBased:     false,
-			DefaultAction:  "pull",
+			DefaultAction:  actions[3],
 		},
 		Auth: auth{
 			Enable:     false,
@@ -76,6 +78,38 @@ func LoadConfig(configPath string) (*ConfigFile, error) {
 	fmt.Println("Configuration file read successfully!")
 
 	return c, nil
+}
+
+func (c *ConfigFile) GetGroups() map[string][]string {
+	groups := make(map[string][]string)
+
+	for _, group := range c.Auth.Groups {
+		groupName := strings.Split(group, ":")[0] // groupName:<action1>,<action2>
+		actionsRaw := strings.Split(group, ":")[1]
+		actions := strings.Split(actionsRaw, ",") // [action1, action2]
+		groups[groupName] = actions
+	}
+
+	return groups
+}
+
+func (c *ConfigFile) GetTokenActions(token string) []string {
+	groups := c.GetGroups()
+	groupName := ""
+
+	for _, tokenSearch := range c.Auth.Tokens {
+		if strings.Contains(tokenSearch, token) {
+			groupName = strings.Split(tokenSearch, ":")[0]
+			break
+		}
+	}
+
+	// If no group is specified in the token, the token will have full access
+	if groupName == "" {
+		return actions
+	}
+
+	return groups[groupName]
 }
 
 func (c *ConfigFile) loadFileTokens() ([]string, error) {
