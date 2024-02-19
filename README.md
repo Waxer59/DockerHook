@@ -189,7 +189,7 @@ auth:
 ```
 
 > [!IMPORTANT]
-> The token to be sent to the Webhook must be the token without the group name specification, i.e. this token `onlyStart:tok3n`should be sent to the Webhook as `tok3n`.
+> The token to be sent to the Webhook must be the token without the group name specification, i.e. this token `onlyStart:tok3n` should be sent to the Webhook as `tok3n`.
 
 ## Examples
 
