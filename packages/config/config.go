@@ -98,9 +98,11 @@ func (c *ConfigFile) GetTokenActions(token string) []string {
 	groupName := ""
 
 	for _, tokenSearch := range c.Auth.Tokens {
-		if strings.Contains(tokenSearch, token) {
-			groupName = strings.Split(tokenSearch, ":")[0]
-			break
+		tokenGroup := strings.Split(tokenSearch, ":")[0]
+		tokenStr := strings.Split(tokenSearch, ":")[1]
+
+		if token == tokenStr {
+			groupName = tokenGroup
 		}
 	}
 
