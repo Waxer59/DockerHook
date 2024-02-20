@@ -77,6 +77,8 @@ func LoadConfig(configPath string) (*ConfigFile, error) {
 
 	fmt.Println("Configuration file read successfully!")
 
+	fmt.Printf("%+v\n", c)
+
 	return c, nil
 }
 
