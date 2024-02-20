@@ -5,10 +5,8 @@ import (
 	"github.com/caarlos0/env/v6"
 )
 
-// /etc/dockerhook/dockerhook.yml
-
 type EnvVariables struct {
-	ConfigPath string `env:"CONFIG_PATH" envDefault:"./dockerhook.yml"`
+	ConfigPath string `env:"CONFIG_PATH" envDefault:"/etc/dockerhook/dockerhook.yml"`
 	Port       string `envDefault:"8080"`
 }
 
