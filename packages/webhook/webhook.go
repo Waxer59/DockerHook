@@ -86,7 +86,7 @@ func Webhook(c *fiber.Ctx, cfg config.ConfigFile, cli client.Client) error {
 		}
 
 		if cfg.Config.RemoveOldImage {
-			_, err = cli.ImageRemove(ctx, selectedContainer.Image, types.ImageRemoveOptions{
+			_, err = cli.ImageRemove(ctx, selectedContainer.ImageID, types.ImageRemoveOptions{
 				Force: true,
 			})
 
