@@ -86,8 +86,9 @@ func (c *ConfigFile) GetGroups() map[string][]string {
 	groups := make(map[string][]string)
 
 	for _, group := range c.Auth.Groups {
-		groupName := strings.Split(group, ":")[0] // groupName:<action1>,<action2>
-		actionsRaw := strings.Split(group, ":")[1]
+		groupSplit := strings.Split(group, ":")
+		groupName := groupSplit[0] // groupName:<action1>,<action2>
+		actionsRaw := groupSplit[1]
 		actions := strings.Split(actionsRaw, ",") // [action1, action2]
 		groups[groupName] = actions
 	}
@@ -99,12 +100,23 @@ func (c *ConfigFile) GetTokenActions(token string) []string {
 	groups := c.GetGroups()
 	groupName := ""
 
+	// Find the group that the token belongs to
 	for _, tokenSearch := range c.Auth.Tokens {
-		tokenGroup := strings.Split(tokenSearch, ":")[0]
-		tokenStr := strings.Split(tokenSearch, ":")[1]
+		tokenSplit := strings.Split(tokenSearch, ":")
+		isGroupToken := len(tokenSplit) == 2 // tokenGroup:<tokenStr>
+
+		if tokenSearch == token { // If the token is found in the tokens file, the token would not belong to any group
+			break
+		} else if !isGroupToken {
+			continue
+		}
+
+		tokenGroup := tokenSplit[0]
+		tokenStr := tokenSplit[1]
 
 		if token == tokenStr {
 			groupName = tokenGroup
+			break
 		}
 	}
 

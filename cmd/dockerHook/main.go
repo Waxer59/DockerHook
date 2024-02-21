@@ -47,12 +47,14 @@ func main() {
 	// middlewares
 	app.Use(logger.New())
 	app.Use(func(c *fiber.Ctx) error {
+		if !cfg.Auth.Enable {
+			return c.Next()
+		}
+
 		registeredTokens := cfg.Auth.Tokens
 		token := c.Query("token")
 		action := c.Query("action")
 		tokenAccess := cfg.GetTokenActions(token)
-
-		fmt.Println(tokenAccess)
 
 		if action == "" {
 			action = cfg.Config.DefaultAction
@@ -62,7 +64,7 @@ func main() {
 			return c.SendStatus(fiber.StatusUnauthorized)
 		}
 
-		if cfg.Auth.Enable && !slices.ContainsFunc(registeredTokens, func(t string) bool {
+		if !slices.ContainsFunc(registeredTokens, func(t string) bool {
 			return strings.Contains(t, token)
 		}) {
 			return c.SendStatus(fiber.StatusUnauthorized)
