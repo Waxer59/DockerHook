@@ -11,7 +11,6 @@
     - [`config`](#config)
       - [`labelBased`](#labelbased)
       - [`defaultAction`](#defaultaction)
-      - [`removeOldImage`](#removeoldimage)
     - [`auth`](#auth)
       - [`enable`](#enable)
       - [`tokensFile`](#tokensfile)
@@ -114,13 +113,6 @@ By default, DockerHook will have access to all containers, you can prevent this 
 * **Default**: `'pull'`
 
 Defines the default action to be performed when the Webhook is called without any [`action`](#action) in the query parameters
-
-#### `removeOldImage`
-
-* **Type**: `boolean`
-* **Default**: `false`
-
-By default, DockerHook will not delete any images after updating a container by doing a pull. Set this property to `true` if you want that after updating a container image the previous one will be removed.
 
 ### `auth`
 

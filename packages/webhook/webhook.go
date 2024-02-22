@@ -85,17 +85,6 @@ func Webhook(c *fiber.Ctx, cfg config.ConfigFile, cli client.Client) error {
 			return c.SendStatus(fiber.StatusInternalServerError)
 		}
 
-		if cfg.Config.RemoveOldImage {
-			_, err = cli.ImageRemove(ctx, selectedContainer.ImageID, types.ImageRemoveOptions{
-				Force: true,
-			})
-
-			if err != nil {
-				fmt.Println(err.Error())
-				return c.SendStatus(fiber.StatusInternalServerError)
-			}
-		}
-
 		resp, err := cli.ContainerCreate(ctx, oldContainer.Config, oldContainer.HostConfig, nil, nil, oldContainer.Name)
 
 		if err != nil {

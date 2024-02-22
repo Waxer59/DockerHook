@@ -16,9 +16,8 @@ type ConfigFile struct {
 }
 
 type config struct {
-	RemoveOldImage bool   `yaml:"removeOldImage"`
-	LabelBased     bool   `yaml:"labelBased"`
-	DefaultAction  string `yaml:"defaultAction" validate:"oneof=pull start stop restart"`
+	LabelBased    bool   `yaml:"labelBased"`
+	DefaultAction string `yaml:"defaultAction" validate:"oneof=pull start stop restart"`
 }
 
 type auth struct {
@@ -31,9 +30,8 @@ type auth struct {
 func LoadConfig(configPath string) (*ConfigFile, error) {
 	c := &ConfigFile{ // default config
 		Config: config{
-			RemoveOldImage: false,
-			LabelBased:     false,
-			DefaultAction:  actions[3],
+			LabelBased:    false,
+			DefaultAction: actions[3],
 		},
 		Auth: auth{
 			Enable:     false,
