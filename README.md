@@ -55,7 +55,7 @@ Specify the path where your configuration file is located
 
 ## WebHook
 
-A webhook is an HTTP-based callback function, DockerHook only accepts **GET** requests to perform all actions.
+A webhook is an HTTP-based callback function, DockerHook accepts **GET** and **POST** requests to perform all actions.
 
 ### Url
 

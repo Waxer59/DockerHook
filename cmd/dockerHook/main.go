@@ -2,14 +2,15 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"slices"
+	"strings"
+
 	"github.com/Waxer59/DockerHook/packages/config"
 	"github.com/Waxer59/DockerHook/packages/webhook"
 	"github.com/docker/docker/client"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
-	"log"
-	"slices"
-	"strings"
 )
 
 func main() {
@@ -74,6 +75,10 @@ func main() {
 	})
 
 	app.Get("/:service", func(c *fiber.Ctx) error {
+		return webhook.Webhook(c, *cfg, *cli)
+	})
+
+	app.Post("/:service", func(c *fiber.Ctx) error {
 		return webhook.Webhook(c, *cfg, *cli)
 	})
 

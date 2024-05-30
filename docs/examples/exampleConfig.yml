@@ -1,1 +1,7 @@
-# TODO
+config:
+  labelBased: false
+
+auth:
+  enable: true
+  tokens:
+    - "v3rys3cur3t0k3n"
