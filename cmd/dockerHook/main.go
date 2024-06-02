@@ -42,7 +42,6 @@ func main() {
 	app := fiber.New(fiber.Config{
 		AppName:       "DockerHook",
 		CaseSensitive: true,
-		GETOnly:       true,
 	})
 
 	// middlewares
