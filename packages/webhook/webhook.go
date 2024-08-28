@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"slices"
+	"strings"
 
 	"github.com/Waxer59/DockerHook/packages/config"
 	"github.com/docker/docker/api/types"
@@ -15,7 +16,8 @@ import (
 )
 
 type queryParameters struct {
-	Action string `query:"action"`
+	Action  string `query:"action"`
+	Version string `query:"version"`
 }
 
 func Webhook(c *fiber.Ctx, cfg config.ConfigFile, cli client.Client) error {
@@ -49,10 +51,13 @@ func Webhook(c *fiber.Ctx, cfg config.ConfigFile, cli client.Client) error {
 
 	switch queryParams.Action {
 	case "start":
+		fmt.Println("Starting container: " + selectedContainer.ID)
 		err = cli.ContainerStart(ctx, selectedContainer.ID, container.StartOptions{})
 	case "stop":
+		fmt.Println("Stopping container: " + selectedContainer.ID)
 		err = cli.ContainerStop(ctx, selectedContainer.ID, container.StopOptions{})
 	case "restart":
+		fmt.Println("Restarting container: " + selectedContainer.ID)
 		err = cli.ContainerRestart(ctx, selectedContainer.ID, container.StopOptions{})
 	case "pull":
 		oldContainer, err := cli.ContainerInspect(ctx, selectedContainer.ID)
@@ -61,6 +66,15 @@ func Webhook(c *fiber.Ctx, cfg config.ConfigFile, cli client.Client) error {
 			fmt.Println(err.Error())
 			return c.SendStatus(fiber.StatusInternalServerError)
 		}
+
+		if queryParams.Version == "" {
+			queryParams.Version = "latest"
+		}
+
+		imageNameWithoutVersion := strings.Split(selectedContainer.Image, ":")[0]
+		selectedContainer.Image = fmt.Sprintf("%s:%s", imageNameWithoutVersion, queryParams.Version)
+
+		fmt.Println("Pulling image: " + selectedContainer.Image)
 
 		pull, err := cli.ImagePull(ctx, selectedContainer.Image, types.ImagePullOptions{})
 
@@ -85,6 +99,12 @@ func Webhook(c *fiber.Ctx, cfg config.ConfigFile, cli client.Client) error {
 			return c.SendStatus(fiber.StatusInternalServerError)
 		}
 
+		fmt.Println("Creating new container with image: " + selectedContainer.Image)
+
+		// Update container with new image
+		oldContainer.Config.Image = selectedContainer.Image
+
+		// Create container with the updated image
 		resp, err := cli.ContainerCreate(ctx, oldContainer.Config, oldContainer.HostConfig, nil, nil, oldContainer.Name)
 
 		if err != nil {

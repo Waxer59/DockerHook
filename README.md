@@ -6,6 +6,7 @@
     - [Url](#url)
     - [Query Parameters](#query-parameters)
       - [`action`](#action)
+    - [`version`](#version)
       - [`token`](#token)
   - [Config Properties](#config-properties)
     - [`config`](#config)
@@ -71,6 +72,16 @@ This is the shape that the URL must have.
 * **Default**: `'pull'`
 
 Specify the action to be done in the service
+
+### `version`
+
+* **Type**: `string`
+* **Default**: `latest`
+
+Specify the version of the image to be pulled
+
+> [!NOTE]
+> This parameter works only when the “pull” action is used.
 
 #### `token`
 
