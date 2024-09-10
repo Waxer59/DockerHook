@@ -6,7 +6,7 @@
     - [Url](#url)
     - [Query Parameters](#query-parameters)
       - [`action`](#action)
-    - [`version`](#version)
+      - [`version`](#version)
       - [`token`](#token)
   - [Config Properties](#config-properties)
     - [`config`](#config)
@@ -83,7 +83,7 @@ Specify the version of the image to be pulled
 > [!NOTE]
 > This parameter works only when the “pull” action is used.
 
-#### `token`
+### `token`
 
 * **Type**: `string`
 
