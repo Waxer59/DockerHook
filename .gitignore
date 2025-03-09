@@ -1,4 +1,5 @@
 .idea
 dockerhook.yml
 .env
+docker-compose.yml
 tokens.txt
