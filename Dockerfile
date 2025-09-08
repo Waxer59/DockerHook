@@ -8,7 +8,7 @@ COPY . .
 
 RUN go build ./cmd/dockerHook
 
-FROM base AS runner
+FROM alpine:latest
 
 WORKDIR /app
 
