@@ -66,7 +66,7 @@ This is the shape that the URL must have.
 
 ### Query Parameters
 
-#### `action`
+### `action`
 
 * **Type**: `'start' | 'stop' | 'restart' | 'pull'`
 * **Default**: `'pull'`
